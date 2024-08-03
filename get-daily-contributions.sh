@@ -5,10 +5,12 @@ jq_filter="[
     | {date, contribution_count}
 ]"
 
-gh api graphql -f query='
+getGraphQLQuery() {
+    local year=$1
+    echo "
     {
       viewer {
-        contributionsCollection {
+        contributionsCollection(from:\"${year}-01-01T00:00:00Z\", to:\"${year}-12-31T23:59:59Z\") {
             contributionCalendar {
                 weeks {
                     contributionDays {
@@ -20,4 +22,7 @@ gh api graphql -f query='
         }
       }
     }
-    ' | jq "$jq_filter"
+    "
+}
+
+gh api graphql -f query="`getGraphQLQuery 2020`" | jq "$jq_filter"
