@@ -1,4 +1,10 @@
 #!/bin/sh
+jq_filter="[
+    .data.viewer.contributionsCollection.contributionCalendar.weeks[].contributionDays[]
+    | {date:.date, contribution_count:.contributionCount}
+    | {date, contribution_count}
+]"
+
 gh api graphql -f query='
     {
       viewer {
@@ -14,4 +20,4 @@ gh api graphql -f query='
         }
       }
     }
-    '
+    ' | jq "$jq_filter"
