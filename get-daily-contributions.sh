@@ -1,4 +1,6 @@
 #!/bin/sh
+starting_year=2018
+current_year=`date +"%Y"`
 jq_filter="[
     .data.viewer.contributionsCollection.contributionCalendar.weeks[].contributionDays[]
     | {date:.date, contribution_count:.contributionCount}
@@ -25,4 +27,7 @@ getGraphQLQuery() {
     "
 }
 
-gh api graphql -f query="`getGraphQLQuery 2020`" | jq "$jq_filter"
+for year in $(seq ${starting_year} $current_year)
+do
+    gh api graphql -f query="`getGraphQLQuery $year`" | jq "$jq_filter"
+done
