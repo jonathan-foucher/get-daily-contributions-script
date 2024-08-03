@@ -1,5 +1,6 @@
 #!/bin/sh
 starting_year=2018
+results=[]
 current_year=`date +"%Y"`
 jq_filter="[
     .data.viewer.contributionsCollection.contributionCalendar.weeks[].contributionDays[]
@@ -29,5 +30,8 @@ getGraphQLQuery() {
 
 for year in $(seq ${starting_year} $current_year)
 do
-    gh api graphql -f query="`getGraphQLQuery $year`" | jq "$jq_filter"
+    year_result=$(gh api graphql -f query="`getGraphQLQuery $year`" | jq "$jq_filter")
+    results=`echo "[$results, $year_result]" | jq ". | flatten"`
 done
+
+echo $results
