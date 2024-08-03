@@ -1,12 +1,22 @@
 #!/bin/sh
-starting_year=2018
 results=[]
-current_year=`date +"%Y"`
 jq_filter="[
     .data.viewer.contributionsCollection.contributionCalendar.weeks[].contributionDays[]
     | {date:.date, contribution_count:.contributionCount}
     | {date, contribution_count}
 ]"
+
+getUserCreatedDate() {
+    gh api graphql -f query="
+    {
+      viewer {
+        createdAt
+      }
+    }
+    " \
+    | jq -r .data.viewer.createdAt \
+    | grep -Eo '^\d{4}-\d{2}-\d{2}' | grep -Eo '^\d{4}'
+}
 
 getGraphQLQuery() {
     local year=$1
@@ -28,6 +38,8 @@ getGraphQLQuery() {
     "
 }
 
+starting_year=$(getUserCreatedDate)
+current_year=`date +"%Y"`
 for year in $(seq ${starting_year} $current_year)
 do
     year_result=$(gh api graphql -f query="`getGraphQLQuery $year`" | jq "$jq_filter")
